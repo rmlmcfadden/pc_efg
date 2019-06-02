@@ -1,0 +1,37 @@
+\documentclass[border=0mm]{standalone}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[charter]{mathdesign}
+\usepackage{tikz}
+
+\begin{document}
+
+\begin{tikzpicture}
+
+% command drawing dimensions
+\newcommand{\offset}{0.25}
+\newcommand{\rwidth}{1.0}
+\newcommand{\rheight}{1.5}
+
+\newcommand{\xorigin}{-0.25}
+\newcommand{\yorigin}{-1.50}
+\newcommand{\sdim}{4.5}
+
+% ad hoc bounding box 
+\draw[white] (\xorigin, \yorigin) rectangle (\xorigin + \sdim, \yorigin + \sdim);
+
+% stack of rectangles
+\draw[fill=white] (0, 0) rectangle (\rwidth, \rheight) node[anchor=south east, align=center] {.cif};
+
+% arrow 
+\draw[->] (\rwidth + 1 * \offset, 0.5 * \rheight) -- (2 * \rwidth + 3 * \offset,  0.5 * \rheight) node[above, midway, align=center, red] {pc\_efg} node[below, midway, align=center, blue] {.yaml};
+
+% rectangle
+\draw[fill=white] (2 * \rwidth + 4 * \offset, 0) rectangle (3 * \rwidth + 4 * \offset, \rheight) node[anchor=south east, align=center] {.yaml} node [midway] {$\frac{\partial^{2} V}{\partial x_{i} \partial x_{j}}$};
+
+%
+%\node[below, align=right] at (2 * \rwidth + 2 * \offset, -2 * \offset) {\textcolor{red}{pc_efg} : a simple EFG calculator};
+
+\end{tikzpicture}
+
+\end{document}
