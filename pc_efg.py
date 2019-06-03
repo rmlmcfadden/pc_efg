@@ -10,9 +10,6 @@ from ase.geometry import get_duplicate_atoms
 from ase.io import read
 from ase.spacegroup import crystal
 
-# data on all the elements
-from mendeleev import element
-
 # working with arrays
 import numpy as np
 
