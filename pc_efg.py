@@ -175,6 +175,14 @@ if __name__ == "__main__":
     )
     print("nu_q = %.4e Hz" % nu_q)
 
+    # prune all the unused charges from the dictionary
+    unique_symbols = list(set(sc.get_chemical_symbols()))
+    for atom in list(ctl["lattice"]["charges"]):
+        is_same = [atom == s for s in unique_symbols]
+        is_used = np.any(is_same)
+        if is_used == False:
+            del ctl["lattice"]["charges"][atom]
+
     # write to the output_file if its specified
     if ctl["calculation"]["output_file"] != None:
         with open(ctl["calculation"]["output_file"], "w") as fh:
