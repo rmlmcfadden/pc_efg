@@ -58,15 +58,29 @@ def EFG(q_1, position_1, q_2, position_2, r_cutoff):
     return V
 
 
+# calculate then eigenvalues/vectors (l and v) for a real/hermitian symmetric
+# matrix M and return the results sorted in the NMR literature convention for
+# EFG tensors (i.e., |V_11| <= |V_22| <= |V_33|)
+# https://stackoverflow.com/a/50562995
+def eigh_sorted(M):
+    evals, evecs = np.linalg.eigh(M)
+    # sort based on ascending magnitude
+    sort_order = np.argsort(evals ** 2)
+    evals = evals[sort_order]
+    evecs = evecs[:, sort_order]
+    return (evals, evecs)
+
+
 # EFG asymmetry parameter
-# def eta(EFG):
+def efg_asymmetry(evals):
+    return (evals[0] - evals[1]) / evals[2]
 
 
 # calculate the quadrupole coupling constant C_q (Hz)
 # efg = the principal component of the EFG (V/A^2)
 # Q = nuclear electric quadrupole moment (mb)
 # antishielding_factor = Sternhiemer antishielding factor for ion (unitless)
-def C_q(efg, Q, antishielding_factor=0.0):
+def quadrupole_coupling(efg, Q, antishielding_factor=0.0):
     shielding = 1.0 - antishielding_factor
     e = physical_constants["elementary charge"][0]
     h = physical_constants["Planck constant"][0]
@@ -74,10 +88,42 @@ def C_q(efg, Q, antishielding_factor=0.0):
     return shielding * e * (eq * 1e20) * (Q * 1e-31) / h
 
 
+# https://stackoverflow.com/a/13849249
+def unit_vector(v):
+    return v / np.linalg.norm(v)
+
+
+#
+def angle_between(v1, v2):
+    v1_u = unit_vector(v1)
+    v2_u = unit_vector(v2)
+    return np.arccos(np.clip(np.dot(v1_u, v2_u), -1.0, 1.0))
+
+
+# calculate the polar angles betwen the EFG PAS and the applied field
+def polar_angles(V, B):
+    theta = 0
+    phi = 0
+    return (theta, phi)
+
+
+# 1st order angular correction for the quadrupole frequency
+def angular_factor(theta, phi, eta):
+    return 0.5 * (
+        np.cos(theta) * np.cos(theta)
+        - 1.0
+        + eta * np.sin(theta) * np.sin(theta) * np.cos(2 * phi)
+    )
+
+
 # calculate the quadrupole frequency
-def nu_q(efg, Q, I, antishielding_factor=0.0):
-    c_q = C_q(efg, Q, antishielding_factor)
-    return 3.0 * c_q / (4.0 * I * (2.0 * I - 1.0))
+def quadrupole_frequency(
+    eq, Q, I, theta=0.0, phi=0.0, eta=0.0, antishielding_factor=0.0
+):
+    shielding = 1.0 - antishielding_factor
+    C_q = quadrupole_coupling(eq, Q, antishielding_factor)
+    f_1 = angular_factor(theta, phi, eta)
+    return 3.0 * C_q * f_1 * shielding / (4.0 * I * (2.0 * I - 1.0))
 
 
 # main routine
@@ -103,7 +149,6 @@ if __name__ == "__main__":
     with open(args.yaml_input, "r") as fh:
         ctl = yaml.load(fh, Loader=yaml.SafeLoader)
 
-    # print(ctl["lattice"]["cif"])
     # make the superlattice
     cif = read(ctl["lattice"]["cif"])
     xtal = crystal(cif, size=(1, 1, 1))
@@ -112,7 +157,6 @@ if __name__ == "__main__":
 
     n_x, n_y, n_z = ctl["lattice"]["size"]
 
-    # print(n_z)
     # create the 8 combinations of transformation matricies
     p1 = [[n_x, 0, 0], [0, n_y, 0], [0, 0, n_z]]
     p2 = [[-n_x, 0, 0], [0, -n_y, 0], [0, 0, -n_z]]
@@ -150,30 +194,24 @@ if __name__ == "__main__":
             ctl["calculation"]["cutoff_radius"],
         )
 
-    # print(V)
+    # calculate the eigenvalues/eigenvectors
+    l, v = eigh_sorted(V)
 
-    # calculate the eigenvalues/eigenvectors and sort them
-    l, v = np.linalg.eigh(V)
-    sl = np.sort(l)
-    sv = v[:, l.argsort()]
-
-    #print(sl)
-    #print(sv)
-
-    #
-    coupling = C_q(
+    # calculate NMR quantities derived from the EFG
+    eta = efg_asymmetry(l)
+    C_q = quadrupole_coupling(
         l, ctl["impurity"]["quadrupole_moment"], ctl["impurity"]["antishielding_factor"]
     )
-    #print("C_q = %.4e Hz" % coupling)
-    #
-    nu_q = nu_q(
+    theta, phi = polar_angles(V, ctl["calculation"]["magnetic_field"])
+    nu_q = quadrupole_frequency(
         l,
         ctl["impurity"]["quadrupole_moment"],
         ctl["impurity"]["spin"],
+        theta,
+        phi,
+        eta,
         ctl["impurity"]["antishielding_factor"],
-        # ctl["calculation"]["magnetic_field"],
     )
-    #print("nu_q = %.4e Hz" % nu_q)
 
     # add the results to the dictionary
     ctl["results"] = {}
@@ -181,8 +219,11 @@ if __name__ == "__main__":
     ctl["results"]["EFG"]["tensor (V/A^2)"] = V.tolist()
     ctl["results"]["EFG"]["eigenvalues (V/A^2)"] = l.tolist()
     ctl["results"]["EFG"]["eigenvectors"] = v.tolist()
-    ctl["results"]["C_q (Hz)"] = float(coupling)
+    ctl["results"]["C_q (Hz)"] = float(C_q)
     ctl["results"]["nu_q (Hz)"] = float(nu_q)
+    ctl["results"]["theta"] = float(theta)
+    ctl["results"]["phi"] = float(phi)
+    ctl["results"]["eta"] = float(eta)
 
     # prune all the unused charges from the dictionary
     unique_symbols = list(set(sc.get_chemical_symbols()))
