@@ -175,6 +175,8 @@ if __name__ == "__main__":
     )
     print("nu_q = %.4e Hz" % nu_q)
 
-    with open(ctl["calculation"]["output"], "w") as fh:
-        yaml.dump(ctl, fh, default_flow_style=False, line_break=True)
+    # write to the output_file if its specified
+    if ctl["calculation"]["output_file"] != None:
+        with open(ctl["calculation"]["output_file"], "w") as fh:
+            yaml.dump(ctl, fh, default_flow_style=False, line_break=True)
     # all done

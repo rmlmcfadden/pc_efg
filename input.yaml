@@ -4,7 +4,7 @@
 calculation:
    cutoff_radius: 25.0 # Angstrom
    magnetic_field: [0.0, 0.0, 6.55] # T
-   output_file: output.yaml
+   output_file: output.yaml # use null of we don't want the results saved
 
 # properties of the probe
 impurity:
