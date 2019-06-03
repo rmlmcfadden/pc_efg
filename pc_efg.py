@@ -157,14 +157,14 @@ if __name__ == "__main__":
     sl = np.sort(l)
     sv = v[:, l.argsort()]
 
-    print(sl)
-    print(sv)
+    #print(sl)
+    #print(sv)
 
     #
     coupling = C_q(
         l, ctl["impurity"]["quadrupole_moment"], ctl["impurity"]["antishielding_factor"]
     )
-    print("C_q = %.4e Hz" % coupling)
+    #print("C_q = %.4e Hz" % coupling)
     #
     nu_q = nu_q(
         l,
@@ -173,7 +173,7 @@ if __name__ == "__main__":
         ctl["impurity"]["antishielding_factor"],
         # ctl["calculation"]["magnetic_field"],
     )
-    print("nu_q = %.4e Hz" % nu_q)
+    #print("nu_q = %.4e Hz" % nu_q)
 
     # add the results to the dictionary
     ctl["results"] = {}
