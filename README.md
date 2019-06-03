@@ -8,7 +8,6 @@ A key observable in many [β-NMR] experiments is the quadrupole splitting of the
 
 `pc_efg` is just a simple `Python` script which uses other libraries to do all the heavy lifting (e.g., parsing the input, creating the supercell etc.). The core dependencies are:
 - [ASE]
-- [Mendeleev]
 - [NumPy]
 - [PyYAML]
 
@@ -52,6 +51,5 @@ Currently, it is not possible to deal with cases where the same element in a lat
 
 [ASE]: https://wiki.fysik.dtu.dk/ase/
 [β-NMR]: https://doi.org/10.1016/j.ssnmr.2015.02.004
-[Mendeleev]: https://bitbucket.org/lukaszmentel/mendeleev/
 [NumPy]: https://www.numpy.org/
 [PyYAML]: https://pyyaml.org/
