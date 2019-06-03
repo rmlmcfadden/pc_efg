@@ -175,6 +175,15 @@ if __name__ == "__main__":
     )
     print("nu_q = %.4e Hz" % nu_q)
 
+    # add the results to the dictionary
+    ctl["results"] = {}
+    ctl["results"]["EFG"] = {}
+    ctl["results"]["EFG"]["tensor (V/A^2)"] = V.tolist()
+    ctl["results"]["EFG"]["eigenvalues (V/A^2)"] = l.tolist()
+    ctl["results"]["EFG"]["eigenvectors"] = v.tolist()
+    ctl["results"]["C_q (Hz)"] = float(coupling)
+    ctl["results"]["nu_q (Hz)"] = float(nu_q)
+
     # prune all the unused charges from the dictionary
     unique_symbols = list(set(sc.get_chemical_symbols()))
     for atom in list(ctl["lattice"]["charges"]):
@@ -183,8 +192,11 @@ if __name__ == "__main__":
         if is_used == False:
             del ctl["lattice"]["charges"][atom]
 
-    # write to the output_file if its specified
-    if ctl["calculation"]["output_file"] != None:
+    # print the results to the terminal if no output is specified
+    if ctl["calculation"]["output_file"] == None:
+        print(yaml.dump(ctl["results"], default_flow_style=False))
+    # or write the updated dictionary to the output_file
+    else:
         with open(ctl["calculation"]["output_file"], "w") as fh:
-            yaml.dump(ctl, fh, default_flow_style=False, line_break=True)
+            yaml.dump(ctl, fh, default_flow_style=False)
     # all done
