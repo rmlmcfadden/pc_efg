@@ -1,0 +1,116 @@
+--- # example calculation for rutile TiO2
+
+# calculations details
+calculation:
+   cutoff_radius: 25.0 # Angstrom
+   magnetic_field: [0.0, 0.0, 6.55] # T
+   output_file: output.yaml
+
+# properties of the probe
+impurity:
+   antishielding_factor: 0.271 # https://doi.org/10.1103/PhysRevB.15.95
+   charge: 1.0
+   gyromagnetic_ratio: 6.3016e6 # MHz/T
+   ionic_radius: 0.7 # Angstrom
+   name: "lithium-8"
+   position: [0.0, 0.5, 0.5]
+   quadrupole_moment: 32.6 # mb
+   spin: 2.0
+
+# properties of the lattice
+lattice:
+   cif: "rutile-TiO2.cif"
+   charges:
+      H: 1.0
+      He: 0.0
+      Li: 1.0
+      Be: 2.0
+      B: 3.0
+      C: 0.0
+      N: -3.0
+      O: -2.0
+      F: -1.0
+      Ne: 0.0
+      Na: 1.0
+      Mg: 2.0
+      Al: 3.0
+      Si: 4.0
+      P: -3.0
+      S: -2.0
+      Cl: -1.0
+      Ar: 0.0
+      K: 1.0
+      Ca: 2.0
+      Sc: 3.0
+      Ti: 4.0
+      V: 5.0
+      Cr: 3.0
+      Mn: 6.0
+      Fe: 3.0
+      Co: 3.0
+      Ni: 2.0
+      Cu: 1.0
+      Zn: 2.0
+      Ga: 3.0
+      Ge: 4.0
+      As: -3.0
+      Se: -2.0
+      Br: -1.0
+      Kr: 0.0
+      Rb: 1.0
+      Sr: 2.0
+      Y: 3.0
+      Zr: 4.0
+      Nb: 5.0
+      Mo: 6.0
+      Tc: 7.0
+      Ru: 3.0
+      Rh: 3.0
+      Pd: 2.0
+      Ag: 1.0
+      Cd: 2.0
+      In: 3.0
+      Sn: -4.0
+      Sb: 3.0
+      Te: -2.0
+      I: -1.0
+      Xe: 0.0
+      Cs: 1.0
+      Ba: 2.0
+      La: 3.0
+      Ce: 3.0
+      Pr: 3.0
+      Nd: 3.0
+      Pm: 3.0
+      Sm: 3.0
+      Eu: 3.0
+      Gd: 3.0
+      Tb: 3.0
+      Dy: 3.0
+      Ho: 3.0
+      Er: 3.0
+      Tm: 3.0
+      Yb: 3.0
+      Lu: 3.0
+      Hf: 4.0
+      Ta: 5.0
+      W: 6.0
+      Re: 7.0
+      Os: 3.0
+      Ir: 3.0
+      Pt: 2.0
+      Au: 1.0
+      Hg: 2.0
+      Tl: 1.0
+      Pb: 2.0
+      Bi: 3.0
+      Po: -2.0
+      At: -1.0
+      Rn: 0.0
+      Fr: 1.0
+      Ra: 2.0
+      Ac: 3.0
+      Th: 4.0
+      Pa: 5.0
+      U: 6.0
+   size: [7, 7, 11] # in both positive & negative directions
