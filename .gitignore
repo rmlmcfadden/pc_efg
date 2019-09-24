@@ -1,2 +1,4 @@
 logo.*
 !logo.tex
+*.pdf
+output.yaml
