@@ -5,7 +5,6 @@ from argparse import ArgumentParser
 
 # tools for creating the supercell using the .cif as input
 from ase.atoms import Atoms
-from ase.build import find_optimal_cell_shape_pure_python, make_supercell
 from ase.geometry import get_duplicate_atoms
 from ase.io import read
 from ase.spacegroup import crystal
@@ -18,6 +17,109 @@ from scipy.constants import physical_constants
 
 # read the yaml input files
 import yaml
+
+# copied from supercells.py in ASE
+# this is to comment out the check that raises and exception when making a sc
+# that extends into negative coordinates
+def make_supercell(prim, P, wrap=True, tol=1e-5):
+    r"""Generate a supercell by applying a general transformation (*P*) to
+    the input configuration (*prim*).
+
+    The transformation is described by a 3x3 integer matrix
+    `\mathbf{P}`. Specifically, the new cell metric
+    `\mathbf{h}` is given in terms of the metric of the input
+    configuraton `\mathbf{h}_p` by `\mathbf{P h}_p =
+    \mathbf{h}`.
+
+    Parameters:
+
+    prim: ASE Atoms object
+        Input configuration.
+    P: 3x3 integer matrix
+        Transformation matrix `\mathbf{P}`.
+    wrap: bool
+        wrap in the end
+    tol: float
+        tolerance for wrapping
+    """
+
+    supercell_matrix = P
+    supercell = clean_matrix(supercell_matrix @ prim.cell)
+
+    # cartesian lattice points
+    lattice_points_frac = lattice_points_in_supercell(supercell_matrix)
+    lattice_points = np.dot(lattice_points_frac, supercell)
+
+    superatoms = Atoms(cell=supercell, pbc=prim.pbc)
+
+    for lp in lattice_points:
+        shifted_atoms = prim.copy()
+        shifted_atoms.positions += lp
+        superatoms.extend(shifted_atoms)
+
+    # check number of atoms is correct
+    """
+    n_target = int(np.round(np.linalg.det(supercell_matrix) * len(prim)))
+    if n_target != len(superatoms):
+        msg = "Number of atoms in supercell: {}, expected: {}".format(
+            n_target, len(superatoms)
+        )
+        raise SupercellError(msg)
+    """
+    if wrap:
+        superatoms.wrap(eps=tol)
+
+    return superatoms
+
+
+def lattice_points_in_supercell(supercell_matrix):
+    """Find all lattice points contained in a supercell.
+
+    Adapted from pymatgen, which is available under MIT license:
+    The MIT License (MIT) Copyright (c) 2011-2012 MIT & The Regents of the
+    University of California, through Lawrence Berkeley National Laboratory
+    """
+
+    diagonals = np.array(
+        [
+            [0, 0, 0],
+            [0, 0, 1],
+            [0, 1, 0],
+            [0, 1, 1],
+            [1, 0, 0],
+            [1, 0, 1],
+            [1, 1, 0],
+            [1, 1, 1],
+        ]
+    )
+    d_points = np.dot(diagonals, supercell_matrix)
+
+    mins = np.min(d_points, axis=0)
+    maxes = np.max(d_points, axis=0) + 1
+
+    ar = np.arange(mins[0], maxes[0])[:, None] * np.array([1, 0, 0])[None, :]
+    br = np.arange(mins[1], maxes[1])[:, None] * np.array([0, 1, 0])[None, :]
+    cr = np.arange(mins[2], maxes[2])[:, None] * np.array([0, 0, 1])[None, :]
+
+    all_points = ar[:, None, None] + br[None, :, None] + cr[None, None, :]
+    all_points = all_points.reshape((-1, 3))
+
+    frac_points = np.dot(all_points, np.linalg.inv(supercell_matrix))
+
+    tvects = frac_points[
+        np.all(frac_points < 1 - 1e-10, axis=1) & np.all(frac_points >= -1e-10, axis=1)
+    ]
+    assert len(tvects) == round(abs(np.linalg.det(supercell_matrix)))
+    return tvects
+
+
+def clean_matrix(matrix, eps=1e-12):
+    """ clean from small values"""
+    matrix = np.array(matrix)
+    for ij in np.ndindex(matrix.shape):
+        if abs(matrix[ij]) < eps:
+            matrix[ij] = 0
+    return matrix
 
 
 # calculate the contribution to the (cartesian) EFG tensor in V/A^2
