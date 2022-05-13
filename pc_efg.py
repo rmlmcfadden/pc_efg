@@ -21,7 +21,7 @@ import yaml
 # copied from supercells.py in ASE
 # this is to comment out the check that raises and exception when making a sc
 # that extends into negative coordinates
-def make_supercell(prim, P, wrap=True, tol=1e-5):
+def make_supercell(prim, P, wrap: bool = True, tol: float = 1e-5):
     r"""Generate a supercell by applying a general transformation (*P*) to
     the input configuration (*prim*).
 
@@ -113,7 +113,7 @@ def lattice_points_in_supercell(supercell_matrix):
     return tvects
 
 
-def clean_matrix(matrix, eps=1e-12):
+def clean_matrix(matrix, eps: float = 1e-12):
     """clean from small values"""
     matrix = np.array(matrix)
     for ij in np.ndindex(matrix.shape):
@@ -123,7 +123,7 @@ def clean_matrix(matrix, eps=1e-12):
 
 
 # calculate the contribution to the (cartesian) EFG tensor in V/A^2
-def EFG(q_1, position_1, q_2, position_2, r_cutoff):
+def EFG(q_1: float, position_1: float, q_2: float, position_2: float, r_cutoff: float):
     # define some constants
     k_e = 1.0 / 4.0 / np.pi / physical_constants["electric constant"][0]
     q_e = physical_constants["elementary charge"][0]
@@ -171,7 +171,7 @@ def eigh_sorted(M):
 
 
 # EFG asymmetry parameter
-def efg_asymmetry(evals):
+def efg_asymmetry(evals: list):
     return (evals[0] - evals[1]) / evals[2]
 
 
@@ -179,7 +179,7 @@ def efg_asymmetry(evals):
 # efg = the principal component of the EFG (V/A^2)
 # Q = nuclear electric quadrupole moment (mb)
 # antishielding_factor = Sternhiemer antishielding factor for ion (unitless)
-def quadrupole_coupling(efg, Q, antishielding_factor=0.0):
+def quadrupole_coupling(efg, Q: float, antishielding_factor: float = 0.0):
     shielding = 1.0 - antishielding_factor
     e = physical_constants["elementary charge"][0]
     h = physical_constants["Planck constant"][0]
@@ -207,7 +207,7 @@ def polar_angles(V, B):
 
 
 # 1st order angular correction for the quadrupole frequency
-def angular_factor(theta, phi, eta):
+def angular_factor(theta: float, phi: float, eta: float):
     return 0.5 * (
         np.cos(theta) * np.cos(theta)
         - 1.0
@@ -217,7 +217,13 @@ def angular_factor(theta, phi, eta):
 
 # calculate the quadrupole frequency
 def quadrupole_frequency(
-    eq, Q, I, theta=0.0, phi=0.0, eta=0.0, antishielding_factor=0.0
+    eq: float,
+    Q: float,
+    I: float,
+    theta: float = 0.0,
+    phi: float = 0.0,
+    eta: float = 0.0,
+    antishielding_factor: float = 0.0,
 ):
     shielding = 1.0 - antishielding_factor
     C_q = quadrupole_coupling(eq, Q, antishielding_factor)
@@ -225,14 +231,19 @@ def quadrupole_frequency(
     return 3.0 * C_q * f_1 * shielding / (4.0 * I * (2.0 * I - 1.0))
 
 
-# main routine
+__version__ = "0.1.0"
 
-if __name__ == "__main__":
+# main routine
+def main():
     # setup the parser
     parser = ArgumentParser(
         prog="pc_efg",
-        description="pc_efg: an EFG calculator for an isolated impurity in a (point charge) crystal lattice",
-        epilog="Copyright (c) 2019 Ryan M. L. McFadden",
+        usage=None,
+        description="pc_efg : An EFG calculator for an isolated impurity in a (point charge) crystal lattice",
+        epilog="Copyright (c) 2019, 2022 Ryan M. L. McFadden",
+        add_help=True,
+        allow_abbrev=True,
+        exit_on_error=True,
     )
     # positional arguments
     parser.add_argument(
@@ -241,7 +252,12 @@ if __name__ == "__main__":
         type=str,
     )
     # optional arguments
-    parser.add_argument("-v", "--version", action="version", version="%(prog)s v0.1")
+    parser.add_argument(
+        "-v",
+        "--version",
+        action="version",
+        version="%s %s" % (parser.prog, __version__),
+    )
     # parse the arguments
     args = parser.parse_args()
     # read the input control file
@@ -301,7 +317,8 @@ if __name__ == "__main__":
     C_q = quadrupole_coupling(
         l, ctl["impurity"]["quadrupole_moment"], ctl["impurity"]["antishielding_factor"]
     )
-    theta, phi = polar_angles(V, ctl["calculation"]["magnetic_field"])
+    # theta, phi = polar_angles(V, ctl["calculation"]["magnetic_field"])
+    """
     nu_q = quadrupole_frequency(
         l,
         ctl["impurity"]["quadrupole_moment"],
@@ -311,6 +328,7 @@ if __name__ == "__main__":
         eta,
         ctl["impurity"]["antishielding_factor"],
     )
+    """
 
     # add the results to the dictionary
     ctl["results"] = {}
@@ -319,9 +337,9 @@ if __name__ == "__main__":
     ctl["results"]["EFG"]["eigenvalues (V/A^2)"] = l.tolist()
     ctl["results"]["EFG"]["eigenvectors"] = v.tolist()
     ctl["results"]["C_q (Hz)"] = float(C_q)
-    ctl["results"]["nu_q (Hz)"] = float(nu_q)
-    ctl["results"]["theta"] = float(theta)
-    ctl["results"]["phi"] = float(phi)
+    # ctl["results"]["nu_q (Hz)"] = float(nu_q)
+    # ctl["results"]["theta"] = float(theta)
+    # ctl["results"]["phi"] = float(phi)
     ctl["results"]["eta"] = float(eta)
 
     # prune all the unused charges from the dictionary
@@ -340,3 +358,7 @@ if __name__ == "__main__":
         with open(ctl["calculation"]["output_file"], "w") as fh:
             yaml.dump(ctl, fh, default_flow_style=False)
     # all done
+
+
+if __name__ == "__main__":
+    main()
