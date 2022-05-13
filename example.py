@@ -26,12 +26,12 @@ ctl["calculation"]["cutoff_radius"] = 10.0
 for p in position:
     # update the z position
     ctl["impurity"]["position"] = [0.0, 0.5, float(p)]
-    
+
     # update the dictionary with temporary input/output filenames
     tmp_input = "p_%.3f_in.yaml" % p
     tmp_output = "p_%.3f_out.yaml" % p
     ctl["calculation"]["output_file"] = tmp_output
-    
+
     # write a temporary yaml for feeding to pc_efg
     with open(tmp_input, "w") as fh:
         yaml.dump(ctl, fh, default_flow_style=False)

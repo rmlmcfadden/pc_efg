@@ -114,7 +114,7 @@ def lattice_points_in_supercell(supercell_matrix):
 
 
 def clean_matrix(matrix, eps=1e-12):
-    """ clean from small values"""
+    """clean from small values"""
     matrix = np.array(matrix)
     for ij in np.ndindex(matrix.shape):
         if abs(matrix[ij]) < eps:
@@ -142,15 +142,15 @@ def EFG(q_1, position_1, q_2, position_2, r_cutoff):
     # only add the contribution from charges within the cutoff radius
     if r <= r_cutoff:
         # cartiasian components
-        V_xx = C * (3 * x * x - 1 * r ** 2) / r ** 5
-        V_xy = C * (3 * x * y - 0 * r ** 2) / r ** 5
-        V_xz = C * (3 * x * z - 0 * r ** 2) / r ** 5
-        V_yx = C * (3 * y * x - 0 * r ** 2) / r ** 5
-        V_yy = C * (3 * y * y - 1 * r ** 2) / r ** 5
-        V_yz = C * (3 * y * z - 0 * r ** 2) / r ** 5
-        V_zx = C * (3 * z * x - 0 * r ** 2) / r ** 5
-        V_zy = C * (3 * z * y - 0 * r ** 2) / r ** 5
-        V_zz = C * (3 * z * z - 1 * r ** 2) / r ** 5
+        V_xx = C * (3 * x * x - 1 * r**2) / r**5
+        V_xy = C * (3 * x * y - 0 * r**2) / r**5
+        V_xz = C * (3 * x * z - 0 * r**2) / r**5
+        V_yx = C * (3 * y * x - 0 * r**2) / r**5
+        V_yy = C * (3 * y * y - 1 * r**2) / r**5
+        V_yz = C * (3 * y * z - 0 * r**2) / r**5
+        V_zx = C * (3 * z * x - 0 * r**2) / r**5
+        V_zy = C * (3 * z * y - 0 * r**2) / r**5
+        V_zz = C * (3 * z * z - 1 * r**2) / r**5
         # put them in an array
         V = np.array([[V_xx, V_xy, V_xz], [V_yx, V_yy, V_yz], [V_zx, V_zy, V_zz]])
 
@@ -164,7 +164,7 @@ def EFG(q_1, position_1, q_2, position_2, r_cutoff):
 def eigh_sorted(M):
     evals, evecs = np.linalg.eigh(M)
     # sort based on ascending magnitude
-    sort_order = np.argsort(evals ** 2)
+    sort_order = np.argsort(evals**2)
     evals = evals[sort_order]
     evecs = evecs[:, sort_order]
     return (evals, evecs)
