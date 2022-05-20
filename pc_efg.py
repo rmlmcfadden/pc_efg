@@ -243,7 +243,6 @@ def main():
         epilog="Copyright (c) 2019, 2022 Ryan M. L. McFadden",
         add_help=True,
         allow_abbrev=True,
-        exit_on_error=True,
     )
     # positional arguments
     parser.add_argument(
